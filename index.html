@@ -26,8 +26,8 @@
             <h1>Seattle Vehicle Collisions</h1>
         </div>
         <nav class="nav-right">
-            <a>Map</a>
-            <a>About</a>
+            <a href="index.html">Map</a>
+            <a href="about.html" class="active">About</a>
         </nav>
     </header>
 
@@ -38,17 +38,17 @@
 
       <div class="control-group">
           <label>
-              <input type="checkbox" id="collisionPoints">
+              <input type="radio" name="mapLayer" id="collisionPoints" value="points">
               Collision Points
           </label>
 
           <label>
-              <input type="checkbox" id="heatMap">
+              <input type="radio" name="mapLayer" id="heatMap" value="heatmap">
               Heat Map
           </label>
 
           <label>
-              <input type="checkbox" id="clusterMap">
+              <input type="radio" name="mapLayer" id="clusterMap" value="cluster">
               Cluster Map
           </label>
       </div>
