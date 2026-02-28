@@ -1,0 +1,56 @@
+body {
+  margin: 0;
+  font-family: 'Merriweather', serif;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Navbar */
+.navbar {
+  height: 60px;
+  background: #103f0d;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.navbar a {
+  color: white;
+  text-decoration: none;
+  margin-left: 15px;
+}
+
+.navbar a.active {
+  font-weight: bold;
+}
+
+/* Main container */
+.main-container {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 300px;
+  background: #f4f4f4;
+  padding: 20px;
+  overflow-y: auto;
+  border-right: 1px solid #ddd;
+}
+
+/* Map section */
+.map-section {
+  flex: 1;
+  position: relative;
+}
+
+/* Map */
+#map {
+  width: 100%;
+  height: 100%;
+}

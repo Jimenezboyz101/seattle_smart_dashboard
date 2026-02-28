@@ -5,91 +5,95 @@
     <title>Seattle Vehicle Collisions</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
 
+    <!-- Mapbox -->
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
 
+    <!-- Icons + Charts -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="css/c3.min.css">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/styles.css">
 
     <script src="js/d3.js"></script>
     <script src="js/c3.min.js"></script>
-
 </head>
+
 <body>
 
-    <!-- Navbar -->
+    <!-- NAVBAR -->
     <header class="navbar">
         <div class="nav-left">
             <h1>Seattle Vehicle Collisions</h1>
         </div>
         <nav class="nav-right">
-            <a href="index.html">Map</a>
-            <a href="about.html" class="active">About</a>
+            <a href="index.html" class="active">Map</a>
+            <a href="about.html">About</a>
         </nav>
     </header>
 
-    <!-- Map Controls -->
-    <div class="sidebar">
+    <!-- MAIN CONTENT WRAPPER -->
+    <div class="main-container">
 
-      <h2>Map Controls</h2>
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <h2>Map Controls</h2>
 
-      <div class="control-group">
-          <label>
-              <input type="radio" name="mapLayer" id="collisionPoints" value="points">
-              Collision Points
-          </label>
+            <div class="control-group">
+                <label>
+                    <input type="radio" name="mapLayer" value="points">
+                    Collision Points
+                </label>
 
-          <label>
-              <input type="radio" name="mapLayer" id="heatMap" value="heatmap">
-              Heat Map
-          </label>
+                <label>
+                    <input type="radio" name="mapLayer" value="heatmap">
+                    Heat Map
+                </label>
 
-          <label>
-              <input type="radio" name="mapLayer" id="clusterMap" value="cluster">
-              Cluster Map
-          </label>
-      </div>
+                <label>
+                    <input type="radio" name="mapLayer" value="cluster" checked>
+                    Cluster Map
+                </label>
+            </div>
 
-      <div class="control-group">
-          <h3>Time Frame</h3>
-          <!-- Time slider placeholder -->
-          <input type="range" id="timeSlider" min="0" max="100" step="1">
-      </div>
+            <div class="control-group">
+                <h3>Time Frame</h3>
+                <input type="range" id="timeSlider" min="0" max="100" step="1">
+            </div>
 
-      <div class="control-group">
-          <h3>Severity</h3>
-          <select id="severityFilter">
-              <option value="all">All</option>
-              <option value="fatal">Lethal</option>
-              <option value="serious">Serious Injury</option>
-              <option value="minor">Injury</option>
-          </select>
-      </div>
+            <div class="control-group">
+                <h3>Severity</h3>
+                <select id="severityFilter">
+                    <option value="all">All</option>
+                    <option value="fatal">Lethal</option>
+                    <option value="serious">Serious Injury</option>
+                    <option value="minor">Injury</option>
+                </select>
+            </div>
+        </aside>
+
+        <!-- MAP AREA -->
+        <section class="map-section">
+            <div id="map"></div>
+        </section>
 
     </div>
 
-    <!-- Map -->
-    <section class="map-section">
-        <div id="map"></div>
-    </section>
-
-    <!-- Analytics Popup -->
+    <!-- ANALYTICS POPUP -->
     <div id="analyticsPopup" class="popup hidden">
         <div class="popup-header">
             <span>Analytics and Visualizations</span>
             <button id="closePopup">X</button>
         </div>
-
         <div class="popup-content">
             <div class="chart" id="barChart"></div>
             <div class="chart" id="pieChart"></div>
         </div>
     </div>
 
-    <script src="main.js"></script>
+    <script src="js/main.js"></script>
 
 </body>
 </html>
