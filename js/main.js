@@ -2,6 +2,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   mapboxgl.accessToken = "pk.eyJ1Ijoib3N3YWxkb2ppbWVuZXoiLCJhIjoiY21reGJqc3NkMDhxbTNqcHh4OGNlYm94OSJ9.OKsd-KUnhUT0HP-tWB8Yqg";
 
+  const slider = document.getElementById("timeSlider");
+  const yearLabel = document.getElementById("selectedYear");
+
+  yearLabel.textContent = slider.value;
+
   // Initialize map
   const map = new mapboxgl.Map({
     container: "map",
@@ -29,12 +34,18 @@ document.addEventListener("DOMContentLoaded", () => {
     // interactions
     addClusterClickHandler(map);
 
-    // Fetch data separately
-    fetchCollisionData(map);
+    // Initial fetch for starting year
+    fetchCollisionData(map, slider.value);
+  });
+
+  // When time slider moves
+  slider.addEventListener("change", (e) => {
+    const selectedYear = e.target.value;
+    yearLabel.textContent = selectedYear;
+    fetchCollisionData(map, selectedYear);
   });
 
 });
-
 
 // Add Collision Layers
 function addCollisionLayers(map) {
@@ -81,15 +92,26 @@ function addCollisionLayers(map) {
 
 }
 
-// Fetch Collision Data
-function fetchCollisionData(map) {
+// Fetch Collision Data By Year
+function fetchCollisionData(map, year) {
 
-  const url = "https://services.arcgis.com/ZOyb2t4B0UYuYNYH/arcgis/rest/services/SDOT_Collisions_All_Years/FeatureServer/0/query?where=1%3D1&outFields=INJURIES,SERIOUSINJURIES,FATALITIES,INCDATE&outSR=4326&f=geojson";
+  const baseUrl = "https://services.arcgis.com/ZOyb2t4B0UYuYNYH/arcgis/rest/services/SDOT_Collisions_All_Years/FeatureServer/0/query";
+
+  const whereClause = `
+    INCDATE >= DATE '${year}-01-01'
+    AND INCDATE < DATE '${Number(year) + 1}-01-01'
+  `;
+
+  const url = `${baseUrl}?where=${encodeURIComponent(whereClause)}
+    &outFields=INJURIES,SERIOUSINJURIES,FATALITIES,INCDATE
+    &outSR=4326
+    &returnGeometry=true
+    &f=geojson`;
 
   fetch(url)
     .then(response => response.json())
     .then(data => {
-      console.log("Collision data loaded:", data.features.length);
+      console.log(`Loaded ${data.features.length} collisions for ${year}`);
       map.getSource("collisions").setData(data);
     })
     .catch(error => {
@@ -97,7 +119,7 @@ function fetchCollisionData(map) {
     });
 }
 
-// Cluster Click Interaction
+// Cluster Click
 function addClusterClickHandler(map) {
 
   map.on("click", "clusters", (e) => {
