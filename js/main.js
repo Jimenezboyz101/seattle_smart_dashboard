@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   map.on("load", () => {
 
-    map.addSource("collisions", {
+    map.addSource("collisions-clustered", {
       type: "geojson",
       data: {
         type: "FeatureCollection",
@@ -23,8 +23,51 @@ document.addEventListener("DOMContentLoaded", () => {
       clusterRadius: 50
     });
 
-    // layers
+    map.addSource("collisions-points", {
+      type: "geojson",
+      data: {
+        type: "FeatureCollection",
+        features: []
+      }
+    });
+    
     addCollisionLayers(map);
+
+    setupLayerToggle(map);
+
+    setupSeverityFilter(map);
+
+    // layers
+
+    // collision points with severity-based colouring
+    map.addLayer({
+      id: "collision-points",
+      type: "circle",
+      source: "collisions-points",
+      paint: {
+        "circle-radius": 4,
+        "circle-opacity": 0.7,
+        "circle-color": [
+        "case",
+
+        [">", ["get", "FATALITIES"], 0],
+        "#d62828",
+
+        [">", ["get", "SERIOUSINJURIES"], 0],
+        "#f77f00",
+
+        [">", ["get", "INJURIES"], 0],
+        "#fcbf49",
+
+        // Default (no injury)
+        "#457b9d"
+      ]
+    },
+
+    layout: {
+      visibility: "none"
+    }
+  });
 
     // interactions
     addClusterClickHandler(map);
@@ -43,7 +86,7 @@ function addCollisionLayers(map) {
   map.addLayer({
     id: "clusters",
     type: "circle",
-    source: "collisions",
+    source: "collisions-clustered",
     filter: ["has", "point_count"],
     paint: {
       "circle-color": [
@@ -68,7 +111,7 @@ function addCollisionLayers(map) {
   map.addLayer({
     id: "cluster-count",
     type: "symbol",
-    source: "collisions",
+    source: "collisions-clustered",
     filter: ["has", "point_count"],
     layout: {
       "text-field": "{point_count_abbreviated}",
@@ -90,7 +133,10 @@ function fetchCollisionData(map) {
     .then(response => response.json())
     .then(data => {
       console.log("Collision data loaded:", data.features.length);
-      map.getSource("collisions").setData(data);
+      map.getSource("collisions-clustered").setData(data);
+      map.getSource("collisions-points").setData(data);
+
+      generateSeverityChart(data);
     })
     .catch(error => {
       console.error("Error fetching collision data:", error);
@@ -107,7 +153,7 @@ function addClusterClickHandler(map) {
 
     const clusterId = features[0].properties.cluster_id;
 
-    map.getSource("collisions").getClusterExpansionZoom(
+    map.getSource("collisions-clustered").getClusterExpansionZoom(
       clusterId,
       (err, zoom) => {
         if (err) return;
@@ -209,24 +255,35 @@ function generateSeverityChart(data) {
   });
 
   c3.generate({
-  bindto: '#barChart',
-  data: {
-    columns: [
-      ['Fatal', fatal],
-      ['Serious Injury', serious],
-      ['Minor Injury', minor],
-      ['No Injury', none]
-    ],
-    type: 'bar',
-    colors: {
-      Fatal: '#d62828',
-      'Serious Injury': '#f77f00',
-      'Minor Injury': '#fcbf49',
-      'No Injury': '#457b9d'
+    bindto: '#barChart',
+    
+    size: {
+    height: 250,   // adjust as needed
+    width: 400     // adjust as needed
+  },
+    data: {
+      columns: [
+        ['Fatal', fatal],
+        ['Serious Injury', serious],
+        ['Minor Injury', minor],
+        ['No Injury', none]
+      ],
+      type: 'bar',
+      colors: {
+        Fatal: '#d62828',
+        'Serious Injury': '#f77f00',
+        'Minor Injury': '#fcbf49',
+        'No Injury': '#457b9d'
+      }
+    },
+    axis: {
+      y: {
+        label: {
+          text: 'Number of Collisions',
+          position: 'outer-middle'
+        }
+      }
     }
-  }
-})
-  .resize({
-    height: 250,
-    width: 400
-   });  
+  });
+
+}
