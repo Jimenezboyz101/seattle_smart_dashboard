@@ -119,5 +119,114 @@ function addClusterClickHandler(map) {
       }
     );
   });
-
 }
+
+// Toggle Menu
+function setupLayerToggle(map) {
+  const radios = document.querySelectorAll('input[name="mapLayer"]');
+
+  radios.forEach(radio => {
+    radio.addEventListener("change", (e) => {
+      const selected = e.target.value;
+
+      map.setLayoutProperty("clusters", "visibility", "none");
+      map.setLayoutProperty("cluster-count", "visibility", "none");
+      map.setLayoutProperty("collision-points", "visibility", "none");
+
+      if (selected === "cluster") {
+        map.setLayoutProperty("clusters", "visibility", "visible");
+        map.setLayoutProperty("cluster-count", "visibility", "visible");
+      }
+
+      if (selected === "points") {
+        map.setLayoutProperty("collision-points", "visibility", "visible");
+      }
+    });
+  });
+}
+
+// Severity Filter
+function setupSeverityFilter(map) {
+  const dropdown = document.getElementById("severityFilter");
+
+  dropdown.addEventListener("change", (e) => {
+    const value = e.target.value;
+
+    let filter;
+
+    if (value === "fatal") {
+      filter = ["all",
+        ["!", ["has", "point_count"]],
+        [">", ["get", "FATALITIES"], 0]
+      ];
+    }
+
+    else if (value === "serious") {
+      filter = ["all",
+        ["!", ["has", "point_count"]],
+        [">", ["get", "SERIOUSINJURIES"], 0]
+      ];
+    }
+
+    else if (value === "minor") {
+      filter = ["all",
+        ["!", ["has", "point_count"]],
+        [">", ["get", "INJURIES"], 0]
+      ];
+    }
+
+    else {
+      filter = ["!", ["has", "point_count"]];
+    }
+
+    map.setFilter("collision-points", filter);
+  });
+}
+
+// Severity Chart
+function generateSeverityChart(data) {
+
+  let fatal = 0;
+  let serious = 0;
+  let minor = 0;
+  let none = 0;
+
+  data.features.forEach(feature => {
+
+    if (feature.properties.FATALITIES > 0) {
+      fatal++;
+    }
+    else if (feature.properties.SERIOUSINJURIES > 0) {
+      serious++;
+    }
+    else if (feature.properties.INJURIES > 0) {
+      minor++;
+    }
+    else {
+      none++;
+    }
+
+  });
+
+  c3.generate({
+  bindto: '#barChart',
+  data: {
+    columns: [
+      ['Fatal', fatal],
+      ['Serious Injury', serious],
+      ['Minor Injury', minor],
+      ['No Injury', none]
+    ],
+    type: 'bar',
+    colors: {
+      Fatal: '#d62828',
+      'Serious Injury': '#f77f00',
+      'Minor Injury': '#fcbf49',
+      'No Injury': '#457b9d'
+    }
+  }
+})
+  .resize({
+    height: 250,
+    width: 400
+   });  
