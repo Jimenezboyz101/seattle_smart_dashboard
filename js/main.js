@@ -339,3 +339,14 @@ function generateSeverityChart(data) {
   });
 
 }
+
+
+function closePopup(id) {
+  // fancy animations TBA
+  document.getElementById(id).style.display = "none";
+}
+
+function openPopup(id) {
+  // fancy animations TBA
+  document.getElementById(id).style.display = "block";
+}

@@ -43,18 +43,20 @@
 
             <div class="control-group">
                 <label>
+                    <input type="radio" name="mapLayer" value="cluster" checked>
+                    Cluster Map
+                </label>
+                <br />
+
+                <label>
                     <input type="radio" name="mapLayer" value="points">
                     Collision Points
                 </label>
+                <br />
 
                 <label>
                     <input type="radio" name="mapLayer" value="heatmap">
                     Heat Map
-                </label>
-
-                <label>
-                    <input type="radio" name="mapLayer" value="cluster" checked>
-                    Cluster Map
                 </label>
             </div>
 
@@ -86,7 +88,7 @@
     <div id="analyticsPopup" class="popup hidden">
         <div class="popup-header">
             <span>Analytics and Visualizations</span>
-            <button id="closePopup">X</button>
+            <button id="closePopup" onclick="closePopup('analyticsPopup');">X</button>
         </div>
         <div class="popup-content">
             <div class="chart" id="barChart"></div>
