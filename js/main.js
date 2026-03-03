@@ -17,7 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   map.on("load", () => {
 
-    map.addSource("collisions", {
+    // Clustered source
+    map.addSource("collisions-clustered", {
       type: "geojson",
       data: {
         type: "FeatureCollection",
@@ -28,17 +29,28 @@ document.addEventListener("DOMContentLoaded", () => {
       clusterRadius: 50
     });
 
-    // layers
+    // Non-clustered source for individual points
+    map.addSource("collisions-points", {
+      type: "geojson",
+      data: {
+        type: "FeatureCollection",
+        features: []
+      }
+    });
+
     addCollisionLayers(map);
 
-    // interactions
+    setupLayerToggle(map);
+
+    setupSeverityFilter(map);
+
     addClusterClickHandler(map);
 
-    // Initial fetch for starting year
+    // Initial fetch
     fetchCollisionData(map, slider.value);
   });
 
-  // When time slider moves
+  // Time slider listener
   slider.addEventListener("change", (e) => {
     const selectedYear = e.target.value;
     yearLabel.textContent = selectedYear;
@@ -47,6 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
+
 // Add Collision Layers
 function addCollisionLayers(map) {
 
@@ -54,7 +67,7 @@ function addCollisionLayers(map) {
   map.addLayer({
     id: "clusters",
     type: "circle",
-    source: "collisions",
+    source: "collisions-clustered",
     filter: ["has", "point_count"],
     paint: {
       "circle-color": [
@@ -79,7 +92,7 @@ function addCollisionLayers(map) {
   map.addLayer({
     id: "cluster-count",
     type: "symbol",
-    source: "collisions",
+    source: "collisions-clustered",
     filter: ["has", "point_count"],
     layout: {
       "text-field": "{point_count_abbreviated}",
@@ -90,7 +103,28 @@ function addCollisionLayers(map) {
     }
   });
 
+  // Individual collision points
+  map.addLayer({
+    id: "collision-points",
+    type: "circle",
+    source: "collisions-points",
+    layout: {
+      visibility: "none"
+    },
+    paint: {
+      "circle-radius": 4,
+      "circle-opacity": 0.7,
+      "circle-color": [
+        "case",
+        [">", ["get", "FATALITIES"], 0], "#d62828",
+        [">", ["get", "SERIOUSINJURIES"], 0], "#f77f00",
+        [">", ["get", "INJURIES"], 0], "#fcbf49",
+        "#457b9d"
+      ]
+    }
+  });
 }
+
 
 // Fetch Collision Data By Year
 function fetchCollisionData(map, year) {
@@ -112,14 +146,19 @@ function fetchCollisionData(map, year) {
     .then(response => response.json())
     .then(data => {
       console.log(`Loaded ${data.features.length} collisions for ${year}`);
-      map.getSource("collisions").setData(data);
+
+      map.getSource("collisions-clustered").setData(data);
+      map.getSource("collisions-points").setData(data);
+
+      generateSeverityChart(data);
     })
     .catch(error => {
       console.error("Error fetching collision data:", error);
     });
 }
 
-// Cluster Click
+
+// Cluster Click Interaction
 function addClusterClickHandler(map) {
 
   map.on("click", "clusters", (e) => {
@@ -129,7 +168,7 @@ function addClusterClickHandler(map) {
 
     const clusterId = features[0].properties.cluster_id;
 
-    map.getSource("collisions").getClusterExpansionZoom(
+    map.getSource("collisions-clustered").getClusterExpansionZoom(
       clusterId,
       (err, zoom) => {
         if (err) return;
@@ -140,6 +179,131 @@ function addClusterClickHandler(map) {
         });
       }
     );
+  });
+}
+
+
+// Toggle Menu
+function setupLayerToggle(map) {
+
+  const radios = document.querySelectorAll('input[name="mapLayer"]');
+
+  radios.forEach(radio => {
+    radio.addEventListener("change", (e) => {
+
+      const selected = e.target.value;
+
+      map.setLayoutProperty("clusters", "visibility", "none");
+      map.setLayoutProperty("cluster-count", "visibility", "none");
+      map.setLayoutProperty("collision-points", "visibility", "none");
+
+      if (selected === "cluster") {
+        map.setLayoutProperty("clusters", "visibility", "visible");
+        map.setLayoutProperty("cluster-count", "visibility", "visible");
+      }
+
+      if (selected === "points") {
+        map.setLayoutProperty("collision-points", "visibility", "visible");
+      }
+
+    });
+  });
+}
+
+
+// Severity Filter
+function setupSeverityFilter(map) {
+
+  const dropdown = document.getElementById("severityFilter");
+
+  dropdown.addEventListener("change", (e) => {
+
+    const value = e.target.value;
+
+    let filter;
+
+    if (value === "fatal") {
+      filter = ["all",
+
+        [">", ["get", "FATALITIES"], 0]
+      ];
+    }
+
+    else if (value === "serious") {
+      filter = ["all",
+        [">", ["get", "SERIOUSINJURIES"], 0]
+      ];
+    }
+
+    else if (value === "minor") {
+      filter = ["all",
+        [">", ["get", "INJURIES"], 0]
+      ];
+    }
+
+    else {
+      filter = null; // show all
+    }
+
+    map.setFilter("collision-points", filter);
+  });
+}
+
+
+// Severity Chart
+function generateSeverityChart(data) {
+
+  let fatal = 0;
+  let serious = 0;
+  let minor = 0;
+  let none = 0;
+
+  data.features.forEach(feature => {
+
+    if (feature.properties.FATALITIES > 0) {
+      fatal++;
+    }
+    else if (feature.properties.SERIOUSINJURIES > 0) {
+      serious++;
+    }
+    else if (feature.properties.INJURIES > 0) {
+      minor++;
+    }
+    else {
+      none++;
+    }
+
+  });
+
+  c3.generate({
+    bindto: '#barChart',
+    size: {
+      height: 250,
+      width: 400
+    },
+    data: {
+      columns: [
+        ['Fatal', fatal],
+        ['Serious Injury', serious],
+        ['Minor Injury', minor],
+        ['No Injury', none]
+      ],
+      type: 'bar',
+      colors: {
+        Fatal: '#d62828',
+        'Serious Injury': '#f77f00',
+        'Minor Injury': '#fcbf49',
+        'No Injury': '#457b9d'
+      }
+    },
+    axis: {
+      y: {
+        label: {
+          text: 'Number of Collisions',
+          position: 'outer-middle'
+        }
+      }
+    }
   });
 
 }
