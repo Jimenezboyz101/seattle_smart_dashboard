@@ -108,3 +108,22 @@ body {
     margin: 0 auto 15px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
+
+.popup {
+  /* would've just copied the about-card class, except that I don't
+     think making popups move-on-hover is a good idea. */
+    background:    white;
+    padding:       20px;
+    border-radius: 12px;
+    box-shadow:    0 8px 20px rgba(0,0,0,0.05);
+}
+
+#analyticsPopup {
+    position: fixed;
+    right:    20px;
+    bottom:   40px; /* lest we clobber the mapdata byline */
+}
+
+#closePopup {
+    float: right;
+}
