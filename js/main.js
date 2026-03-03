@@ -2,6 +2,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   mapboxgl.accessToken = "pk.eyJ1Ijoib3N3YWxkb2ppbWVuZXoiLCJhIjoiY21reGJqc3NkMDhxbTNqcHh4OGNlYm94OSJ9.OKsd-KUnhUT0HP-tWB8Yqg";
 
+  const slider = document.getElementById("timeSlider");
+  const yearLabel = document.getElementById("selectedYear");
+
+  yearLabel.textContent = slider.value;
+
   // Initialize map
   const map = new mapboxgl.Map({
     container: "map",
@@ -30,7 +35,6 @@ document.addEventListener("DOMContentLoaded", () => {
         features: []
       }
     });
-    
     addCollisionLayers(map);
 
     setupLayerToggle(map);
@@ -72,8 +76,15 @@ document.addEventListener("DOMContentLoaded", () => {
     // interactions
     addClusterClickHandler(map);
 
-    // Fetch data separately
-    fetchCollisionData(map);
+    // Initial fetch
+    fetchCollisionData(map, slider.value);
+  });
+
+  // Time slider listener
+  slider.addEventListener("change", (e) => {
+    const selectedYear = e.target.value;
+    yearLabel.textContent = selectedYear;
+    fetchCollisionData(map, selectedYear);
   });
 
 });
@@ -122,17 +133,50 @@ function addCollisionLayers(map) {
     }
   });
 
+  // Individual collision points
+  map.addLayer({
+    id: "collision-points",
+    type: "circle",
+    source: "collisions-points",
+    layout: {
+      visibility: "none"
+    },
+    paint: {
+      "circle-radius": 4,
+      "circle-opacity": 0.7,
+      "circle-color": [
+        "case",
+        [">", ["get", "FATALITIES"], 0], "#d62828",
+        [">", ["get", "SERIOUSINJURIES"], 0], "#f77f00",
+        [">", ["get", "INJURIES"], 0], "#fcbf49",
+        "#457b9d"
+      ]
+    }
+  });
 }
 
-// Fetch Collision Data
-function fetchCollisionData(map) {
 
-  const url = "https://services.arcgis.com/ZOyb2t4B0UYuYNYH/arcgis/rest/services/SDOT_Collisions_All_Years/FeatureServer/0/query?where=1%3D1&outFields=INJURIES,SERIOUSINJURIES,FATALITIES,INCDATE&outSR=4326&f=geojson";
+// Fetch Collision Data By Year
+function fetchCollisionData(map, year) {
+
+  const baseUrl = "https://services.arcgis.com/ZOyb2t4B0UYuYNYH/arcgis/rest/services/SDOT_Collisions_All_Years/FeatureServer/0/query";
+
+  const whereClause = `
+    INCDATE >= DATE '${year}-01-01'
+    AND INCDATE < DATE '${Number(year) + 1}-01-01'
+  `;
+
+  const url = `${baseUrl}?where=${encodeURIComponent(whereClause)}
+    &outFields=INJURIES,SERIOUSINJURIES,FATALITIES,INCDATE
+    &outSR=4326
+    &returnGeometry=true
+    &f=geojson`;
 
   fetch(url)
     .then(response => response.json())
     .then(data => {
-      console.log("Collision data loaded:", data.features.length);
+      console.log(`Loaded ${data.features.length} collisions for ${year}`);
+
       map.getSource("collisions-clustered").setData(data);
       map.getSource("collisions-points").setData(data);
 
@@ -169,10 +213,12 @@ function addClusterClickHandler(map) {
 
 // Toggle Menu
 function setupLayerToggle(map) {
+
   const radios = document.querySelectorAll('input[name="mapLayer"]');
 
   radios.forEach(radio => {
     radio.addEventListener("change", (e) => {
+
       const selected = e.target.value;
 
       map.setLayoutProperty("clusters", "visibility", "none");
@@ -187,15 +233,19 @@ function setupLayerToggle(map) {
       if (selected === "points") {
         map.setLayoutProperty("collision-points", "visibility", "visible");
       }
+
     });
   });
 }
 
+
 // Severity Filter
 function setupSeverityFilter(map) {
+
   const dropdown = document.getElementById("severityFilter");
 
   dropdown.addEventListener("change", (e) => {
+
     const value = e.target.value;
 
     let filter;
@@ -203,6 +253,7 @@ function setupSeverityFilter(map) {
     if (value === "fatal") {
       filter = ["all",
         ["!", ["has", "point_count"]],
+
         [">", ["get", "FATALITIES"], 0]
       ];
     }
@@ -223,6 +274,7 @@ function setupSeverityFilter(map) {
 
     else {
       filter = ["!", ["has", "point_count"]];
+      filter = null; // show all
     }
 
     map.setFilter("collision-points", filter);
@@ -256,7 +308,7 @@ function generateSeverityChart(data) {
 
   c3.generate({
     bindto: '#barChart',
-    
+
     size: {
     height: 250,   // adjust as needed
     width: 400     // adjust as needed
