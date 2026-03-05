@@ -128,3 +128,10 @@ body {
     margin: 0 auto 15px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
+
+.popup-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+}

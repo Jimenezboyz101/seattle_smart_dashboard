@@ -167,7 +167,7 @@ function fetchCollisionData(map, year) {
   `;
 
   const url = `${baseUrl}?where=${encodeURIComponent(whereClause)}
-    &outFields=INJURIES,SERIOUSINJURIES,FATALITIES,INCDATE
+    &outFields=INJURIES,SERIOUSINJURIES,FATALITIES,INCDATE,COLLISIONTYPE
     &outSR=4326
     &returnGeometry=true
     &f=geojson`;
@@ -181,6 +181,7 @@ function fetchCollisionData(map, year) {
       map.getSource("collisions-points").setData(data);
 
       generateSeverityChart(data);
+      generateCollisionTypePie(data)
     })
     .catch(error => {
       console.error("Error fetching collision data:", error);
@@ -335,6 +336,40 @@ function generateSeverityChart(data) {
           position: 'outer-middle'
         }
       }
+    }
+  });
+
+}
+
+// Collision Type Pie Chart
+function generateCollisionTypePie(data) {
+
+  const counts = {};
+
+  data.features.forEach(feature => {
+    const type = feature.properties.COLLISIONTYPE || "Unknown";
+    counts[type] = (counts[type] || 0) + 1;
+  });
+
+  const columns = Object.entries(counts).map(([key, value]) => {
+    return [key, value];
+  });
+
+  c3.generate({
+    bindto: '#pieChart',
+
+    size: {
+      height: 300,
+      width: 400
+    },
+
+    data: {
+      columns: columns,
+      type: 'pie'
+    },
+
+    legend: {
+      position: 'right'
     }
   });
 
