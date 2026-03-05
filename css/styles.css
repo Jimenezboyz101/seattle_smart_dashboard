@@ -56,37 +56,17 @@ body {
 }
 
 /* About Page */
-body {
-    margin: 0;
-    font-family: 'Merriweather', serif;
-    background-color: #f4f6f8;
-    color: #1f2933;
-}
-
 .about-container {
     max-width: 1100px;
     margin: 60px auto;
     padding: 0 20px;
 }
 
-.navbar {
-    background-color: #0b3d2e;
-    color: white;
-    padding: 20px 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
 .navbar a {
     color: white;
     text-decoration: none;
     margin-left: 20px;
-    font-weight: 500;
-}
-
-.navbar a.active {
-    border-bottom: 2px solid #ffffff;
+    font-size: 16px;
 }
 
 .about-card {
@@ -105,7 +85,7 @@ body {
 
 .about-card h2 {
     margin-top: 0;
-    color: #0b3d2e;
+    color: #103f0d;
     font-size: 26px;
 }
 
@@ -123,7 +103,7 @@ body {
 .member-photo {
     width: 120px;
     height: 120px;
-    background-color: #d9e2ec;
+    background-color: #ededed;
     border-radius: 50%;
     margin: 0 auto 15px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
