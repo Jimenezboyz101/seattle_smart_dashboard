@@ -153,6 +153,58 @@ function addCollisionLayers(map) {
       ]
     }
   });
+
+  // Heatmap Layer
+  map.addLayer({
+    id: "collision-heatmap",
+    type: "heatmap",
+    source: "collisions-points",
+    layout: {
+      visibility: "none"
+    },
+    paint: {
+      "heatmap-weight": 0.5,
+
+      "heatmap-intensity": [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        0, 0.5,
+        9, 1,
+        15, 1.5
+      ],
+
+      "heatmap-color": [
+        "interpolate",
+        ["linear"],
+        ["heatmap-density"],
+        0, "rgba(0,0,255,0)",
+        0.1, "#2c7bb6",
+        0.2, "#abd9e9",
+        0.35, "#ffffbf",
+        0.5, "#fdae61",
+        0.7, "#f46d43",
+        1, "#d73027"
+      ],
+
+      "heatmap-radius": [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        0, 5,
+        9, 20,
+        15, 40
+      ],
+
+      "heatmap-opacity": [
+        "interpolate",
+        ["linear"],
+        ["zoom"],
+        7, 1,
+        15, 0.6
+      ]
+    }
+  });
 }
 
 
@@ -222,21 +274,31 @@ function setupLayerToggle(map) {
 
       const selected = e.target.value;
 
-      map.setLayoutProperty("clusters", "visibility", "none");
-      map.setLayoutProperty("cluster-count", "visibility", "none");
-      map.setLayoutProperty("collision-points", "visibility", "none");
-
       if (selected === "cluster") {
+
         map.setLayoutProperty("clusters", "visibility", "visible");
         map.setLayoutProperty("cluster-count", "visibility", "visible");
-      }
+        map.setLayoutProperty("collision-points", "visibility", "none");
+        map.setLayoutProperty("collision-heatmap", "visibility", "none");
 
-      if (selected === "points") {
+      } else if (selected === "points") {
+
+        map.setLayoutProperty("clusters", "visibility", "none");
+        map.setLayoutProperty("cluster-count", "visibility", "none");
         map.setLayoutProperty("collision-points", "visibility", "visible");
-      }
+        map.setLayoutProperty("collision-heatmap", "visibility", "none");
 
+      } else if (selected === "heatmap") {
+
+        map.setLayoutProperty("clusters", "visibility", "none");
+        map.setLayoutProperty("cluster-count", "visibility", "none");
+        map.setLayoutProperty("collision-points", "visibility", "none");
+        map.setLayoutProperty("collision-heatmap", "visibility", "visible");
+
+      }
     });
   });
+
 }
 
 
@@ -279,6 +341,7 @@ function setupSeverityFilter(map) {
     }
 
     map.setFilter("collision-points", filter);
+    map.setFilter("collision-heatmap", filter);
   });
 }
 
