@@ -89,6 +89,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
+document.getElementById("closePopup").addEventListener("click", function () {
+    document.getElementById("analyticsPopup").classList.toggle("collapsed");
+});
 
 // Add Collision Layers
 function addCollisionLayers(map) {
