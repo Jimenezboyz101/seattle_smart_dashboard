@@ -120,10 +120,50 @@ body {
 
 #analyticsPopup {
     position: fixed;
-    right:    20px;
-    bottom:   40px; /* lest we clobber the mapdata byline */
+    right:    12px;
+    bottom:   33px; /* lest we clobber the mapdata byline */
 }
 
 #closePopup {
     float: right;
+    margin-left: 12px;
+}
+
+.popup-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+#analyticsPopup.collapsed .popup-content {
+  display: none;
+}
+
+.control-group {
+  line-height: 200%;
+  font-family: sans-serif;
+}
+
+.sidebar {
+  position: fixed;
+  z-index:  9999; /* lest it vanish 'neath the map */
+
+  background:    white;
+  padding:       0px 20px 20px;
+  border-radius: 12px;
+  box-shadow:    0 8px 20px rgba(0,0,0,0.05);
+
+  left: 12px;
+  top:  72px; /* accounting for 60px navbar */
+}
+
+h3 {
+  font-weight: bold;
+  font-family: 'Merriweather', serif;
+}
+
+.popup-header {
+  font-weight: bold;
+  padding:     0px 10px 10px;
 }
