@@ -91,6 +91,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 document.getElementById("closePopup").addEventListener("click", function () {
     document.getElementById("analyticsPopup").classList.toggle("collapsed");
+    if(closePopup.textContent === "⮟")
+      closePopup.textContent = "⮝";
+    else
+      closePopup.textContent = "⮟";
 });
 
 // Add Collision Layers
