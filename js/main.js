@@ -108,7 +108,7 @@ function addCollisionLayers(map) {
         ["get", "point_count"],
         "#51bbd6",
         100, "#f1f075",
-        300, "#f28cb1"
+        300, "#d62828"
       ],
       "circle-radius": [
         "step",
@@ -117,7 +117,7 @@ function addCollisionLayers(map) {
         100, 28,
         500, 38
       ],
-      "circle-opacity": 0.85
+      "circle-opacity": 0.4
     }
   });
 
@@ -262,6 +262,12 @@ function addClusterClickHandler(map) {
           center: features[0].geometry.coordinates,
           zoom: zoom
         });
+
+        if (zoom >= 14) { // adjust zoom level as needed
+          map.setLayoutProperty("clusters", "visibility", "none");
+          map.setLayoutProperty("cluster-count", "visibility", "none");
+          map.setLayoutProperty("collision-points", "visibility", "visible");
+        }
       }
     );
   });
@@ -396,6 +402,10 @@ function generateSeverityChart(data) {
       }
     },
     axis: {
+      x: {
+        type: 'category',
+        categories: ['Severity'] // single bar set
+      },
       y: {
         label: {
           text: 'Number of Collisions',
